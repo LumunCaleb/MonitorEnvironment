@@ -90,31 +90,29 @@ def fetch_and_predict():
     # Update session state plot data
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
-    # Plot results as a progressive bar chart with connected points
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Plot results as a progressive histogram with connected points
+    fig, ax = plt.subplots(figsize=(12, 8))  # Increase figure size
     df_sorted = st.session_state.plot_data.sort_values(by='Timestamp')
 
-    # Calculate counts for each prediction level
-    df_sorted['Prediction'] = df_sorted['Prediction'].astype(str)  # Ensure the prediction is a string for proper plotting
-
-    # Plot histogram with connected points
+    # Plot histogram bars
     for status in ['M', 'U', 'S']:
         subset = df_sorted[df_sorted['Prediction'] == status]
-        ax.hist(subset['Timestamp'], bins=50, label=status, alpha=0.6)
+        ax.hist(subset['Timestamp'], bins=30, label=status, alpha=0.6, edgecolor='black')  # Adjust bins and add edgecolor
 
-    # Add connected points
+    # Plot connected points
     for status in ['M', 'U', 'S']:
         subset = df_sorted[df_sorted['Prediction'] == status]
-        ax.plot(subset['Timestamp'], [status] * len(subset), 'o', label=f'{status} Points')
+        ax.plot(subset['Timestamp'], [status] * len(subset), 'o-', label=f'{status} Points', markersize=8)  # Increase marker size
 
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Prediction Level')
     ax.set_title('Progressive Predictions Over Time')
     ax.legend(loc='upper right')
 
-    # Rotate timestamp labels
+    # Rotate timestamp labels and adjust spacing
     plt.xticks(rotation=90)
-    
+    plt.tight_layout()  # Adjust layout to fit labels
+
     st.pyplot(fig)
 
     # Allow user to download the results
@@ -128,6 +126,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 # def fetch_and_predict():
