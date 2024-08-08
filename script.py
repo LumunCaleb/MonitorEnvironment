@@ -29,7 +29,7 @@ st.write("Real-Time Prediction from Google Sheets:")
 # Google Sheets API setup
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
-# Load credentials from the Streamlit secrets
+# Load credentials from Streamlit secrets
 creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_api"], scope)
 client = gspread.authorize(creds)
 
@@ -45,7 +45,7 @@ def fetch_and_predict():
     data = worksheet.get_all_values()
     df = pd.DataFrame(data[1:], columns=data[0])
 
-    # Ensure Week, Temp, Hum, and Gas columns exist
+    # Ensure Week, Temp, Hum, and Gas columns exist and exclude Date and Time
     if all(col in df.columns for col in ['Week', 'Temp', 'Hum', 'Gas']):
         # Convert columns to appropriate data types
         df['Week'] = pd.to_numeric(df['Week'], errors='coerce')
