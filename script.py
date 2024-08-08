@@ -47,6 +47,9 @@ def fetch_and_predict():
         st.warning("'Prev. Status' column is missing in the Google Sheet. Adding a default value 'M'.")
         df['Prev. Status'] = 'M'
     
+    # Replace empty strings with 'M' in 'Prev. Status'
+    df['Prev. Status'].replace('', 'M', inplace=True)
+    
     # Convert columns to appropriate data types
     for col in ['Week', 'Temp', 'Hum', 'Gas']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -106,7 +109,6 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
-
 
 
 
