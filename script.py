@@ -53,7 +53,7 @@ def fetch_and_predict():
 
     # Handle encoding of 'Prev. Status'
     try:
-        df['Prev_Status'] = label_encoder.transform(df['Prev. Status'])
+        df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
     except ValueError as e:
         st.error(f"Error in transforming 'Prev. Status' column: {str(e)}")
         st.stop()
@@ -70,7 +70,10 @@ def fetch_and_predict():
     df['Prediction'] = predictions
 
     # Add timestamp to the dataframe
-    df['Timestamp'] = pd.to_datetime(df['DATE'] + ' ' + df['TIME'])
+    if 'DATE' in df.columns and 'TIME' in df.columns:
+        df['Timestamp'] = pd.to_datetime(df['DATE'] + ' ' + df['TIME'])
+    else:
+        df['Timestamp'] = pd.Timestamp.now()
 
     # Update session state plot data
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
@@ -99,4 +102,5 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
