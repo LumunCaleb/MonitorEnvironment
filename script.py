@@ -56,7 +56,11 @@ def fetch_and_predict():
 
     # Handle encoding of 'Prev. Status'
     try:
-        df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
+        # Fit the encoder on the known categories (only if it hasn't been fit before)
+        if 'Prev_Status' not in df.columns:
+            df['Prev_Status'] = label_encoder.fit_transform(df[['Prev. Status']])
+        else:
+            df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
     except ValueError as e:
         st.error(f"Error in transforming 'Prev. Status' column: {str(e)}")
         st.stop()
@@ -104,9 +108,4 @@ def fetch_and_predict():
 
 if st.button('Fetch and Predict'):
     fetch_and_predict()
-
-st.write("This section will refresh every 60 seconds to fetch new data and update predictions.")
-while True:
-    fetch_and_predict()
-    time.sleep(60)
 
