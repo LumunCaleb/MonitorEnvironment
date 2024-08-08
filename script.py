@@ -22,7 +22,7 @@ st.title("Environmental Monitoring App")
 if 'previous_prediction' not in st.session_state:
     st.session_state.previous_prediction = 'M'
 if 'plot_data' not in st.session_state:
-    st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev. Status', 'Prediction', 'Timestamp'])
+    st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp'])
 
 st.write("Real-Time Prediction from Google Sheets:")
 
@@ -41,43 +41,56 @@ def fetch_and_predict():
 
     # Ensure required columns exist
     expected_columns = ['Week', 'Temp', 'Hum', 'Gas', 'Prev. Status']
-    if all(col in df.columns for col in expected_columns):
-        # Convert columns to appropriate data types
-        for col in ['Week', 'Temp', 'Hum', 'Gas']:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-        df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
-        df.dropna(subset=expected_columns, inplace=True)
+    
+    # Check if 'Prev. Status' column exists, if not create it with a default value 'M'
+    if 'Prev. Status' not in df.columns:
+        st.warning("'Prev. Status' column is missing in the Google Sheet. Adding a default value 'M'.")
+        df['Prev. Status'] = 'M'
+    
+    # Convert columns to appropriate data types
+    for col in ['Week', 'Temp', 'Hum', 'Gas']:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        # Select features and scale them
-        features = df[expected_columns]
-        features_scaled = scaler.transform(features)
+    # Handle encoding of 'Prev. Status'
+    try:
+        df['Prev_Status'] = label_encoder.transform(df['Prev. Status'])
+    except ValueError as e:
+        st.error(f"Error in transforming 'Prev. Status' column: {str(e)}")
+        st.stop()
 
-        # Predict using the model
-        predictions = model.predict(features_scaled)
-        df['Prediction'] = predictions
+    # Drop rows with any NaN values
+    df.dropna(subset=expected_columns, inplace=True)
 
-        # Add timestamp to the dataframe
-        df['Timestamp'] = pd.to_datetime(df['DATE'] + ' ' + df['TIME'])
+    # Select features and scale them
+    features = df[['Week', 'Prev_Status', 'Temp', 'Hum', 'Gas']]
+    features_scaled = scaler.transform(features)
 
-        # Update session state plot data
-        st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[expected_columns + ['Prediction', 'Timestamp']]])
+    # Predict using the model
+    predictions = model.predict(features_scaled)
+    df['Prediction'] = predictions
 
-        # Plot results
-        color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
-        df['Color'] = df['Prediction'].map(color_map)
-        fig, ax = plt.subplots()
-        for label, color in color_map.items():
-            subset = df[df['Prediction'] == label]
-            ax.scatter(subset['Timestamp'], [label] * len(subset), color=color, label=label)
-        ax.set_xlabel('Timestamp')
-        ax.set_ylabel('Prediction')
-        ax.set_title('Real-Time Prediction Results')
-        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        st.pyplot(fig)
+    # Add timestamp to the dataframe
+    df['Timestamp'] = pd.to_datetime(df['DATE'] + ' ' + df['TIME'])
 
-        # Allow user to download the results
-        csv = df.to_csv(index=False)
-        st.download_button(label="Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
+    # Update session state plot data
+    st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
+
+    # Plot results
+    color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
+    df['Color'] = df['Prediction'].map(color_map)
+    fig, ax = plt.subplots()
+    for label, color in color_map.items():
+        subset = df[df['Prediction'] == label]
+        ax.scatter(subset['Timestamp'], [label] * len(subset), color=color, label=label)
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Prediction')
+    ax.set_title('Real-Time Prediction Results')
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    st.pyplot(fig)
+
+    # Allow user to download the results
+    csv = df.to_csv(index=False)
+    st.download_button(label="Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
 
 if st.button('Fetch and Predict'):
     fetch_and_predict()
