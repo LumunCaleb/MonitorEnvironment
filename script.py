@@ -100,7 +100,13 @@ def fetch_and_predict():
 
     # Allow user to download the results
     csv = df.to_csv(index=False)
-    st.download_button(label="Downloa
+    st.download_button(label="Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
 
+if st.button('Fetch and Predict'):
+    fetch_and_predict()
 
+st.write("This section will refresh every 60 seconds to fetch new data and update predictions.")
+while True:
+    fetch_and_predict()
+    time.sleep(60)
 
