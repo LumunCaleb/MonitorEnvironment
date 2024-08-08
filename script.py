@@ -3,8 +3,7 @@ import pandas as pd
 import joblib
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+import plotly.graph_objects as go
 import time
 
 # Define the paths to your joblib files
@@ -88,40 +87,39 @@ def fetch_and_predict():
         df['Timestamp'] = pd.Timestamp.now()
 
     # Update session state plot data
-    st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
+    st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Prev_Status', 'Prediction']]])
 
-    # Plot results as a progressive histogram with connected points
-    fig, ax = plt.subplots(figsize=(14, 8))  # Increase figure size
+    # Sankey Plot - Group by Prev_Status and Prediction
+    sankey_df = st.session_state.plot_data.groupby(['Prev_Status', 'Prediction']).size().reset_index(name='Count')
 
-    df_sorted = st.session_state.plot_data.sort_values(by='Timestamp')
+    # Define node labels
+    labels = ['M', 'U', 'S']
+    label_dict = {label: i for i, label in enumerate(labels)}
 
-    # Define heights for each prediction status
-    heights = {'U': 3, 'M': 6, 'S': 10}
-    
-    # Plot bars and connect tops with lines
-    for status in ['U', 'M', 'S']:
-        subset = df_sorted[df_sorted['Prediction'] == status]
-        counts = subset['Timestamp'].value_counts().sort_index()  # Count occurrences per timestamp
-        timestamps = counts.index
-        values = counts.values * heights[status]  # Adjust height for each status
+    # Create source and target lists for the sankey diagram
+    sources = sankey_df['Prev_Status'].map(label_dict).tolist()
+    targets = sankey_df['Prediction'].map(label_dict).tolist()
+    values = sankey_df['Count'].tolist()
 
-        # Plot bars
-        ax.bar(timestamps, values, width=0.5, label=f'{status} Bars', alpha=0.6, edgecolor='black')
-        
-        # Plot line connecting tops of the bars
-        if len(timestamps) > 1:
-            ax.plot(timestamps, values, marker='o', linestyle='-', label=f'{status} Line', linewidth=2)
+    # Create the Sankey diagram
+    fig = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=labels,
+            color=["orange", "red", "green"]
+        ),
+        link=dict(
+            source=sources,
+            target=targets,
+            value=values,
+            color=["rgba(255,165,0,0.8)", "rgba(255,0,0,0.8)", "rgba(0,128,0,0.8)"]
+        )
+    )])
 
-    ax.set_xlabel('Timestamp')
-    ax.set_ylabel('Prediction Level')
-    ax.set_title('Progressive Predictions Over Time')
-    ax.legend(loc='upper right')
-
-    # Rotate timestamp labels and adjust spacing
-    plt.xticks(rotation=90)
-    plt.tight_layout()  # Adjust layout to fit labels
-
-    st.pyplot(fig)
+    fig.update_layout(title_text="Sankey Diagram of Prediction Transitions", font_size=10)
+    st.plotly_chart(fig)
 
     # Allow user to download the results
     csv = df.to_csv(index=False)
@@ -134,6 +132,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 
