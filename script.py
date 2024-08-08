@@ -22,7 +22,7 @@ st.title("Environmental Monitoring App")
 if 'previous_prediction' not in st.session_state:
     st.session_state.previous_prediction = 'M'
 if 'plot_data' not in st.session_state:
-    st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp'])
+    st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev. Status', 'Prediction', 'Timestamp'])
 
 st.write("Real-Time Prediction from Google Sheets:")
 
