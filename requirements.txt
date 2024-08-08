@@ -6,3 +6,5 @@ joblib
 matplotlib
 gspread
 oauth2client
+json
+toml
