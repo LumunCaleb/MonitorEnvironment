@@ -4,6 +4,7 @@ import joblib
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import time
 
 # Define the paths to your joblib files
@@ -89,24 +90,32 @@ def fetch_and_predict():
     # Update session state plot data
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
-    # Plot results as a progressive bar chart
-    fig, ax = plt.subplots()
+    # Plot results as a progressive bar chart with connected points
+    fig, ax = plt.subplots(figsize=(10, 6))
     df_sorted = st.session_state.plot_data.sort_values(by='Timestamp')
 
-    # Calculate the counts for each prediction category over time
-    prediction_counts = df_sorted.groupby(['Timestamp', 'Prediction']).size().unstack(fill_value=0)
+    # Calculate counts for each prediction level
+    df_sorted['Prediction'] = df_sorted['Prediction'].astype(str)  # Ensure the prediction is a string for proper plotting
+
+    # Plot histogram with connected points
+    for status in ['M', 'U', 'S']:
+        subset = df_sorted[df_sorted['Prediction'] == status]
+        ax.hist(subset['Timestamp'], bins=50, label=status, alpha=0.6)
+
+    # Add connected points
+    for status in ['M', 'U', 'S']:
+        subset = df_sorted[df_sorted['Prediction'] == status]
+        ax.plot(subset['Timestamp'], [status] * len(subset), 'o', label=f'{status} Points')
+
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Prediction Level')
+    ax.set_title('Progressive Predictions Over Time')
+    ax.legend(loc='upper right')
+
+    # Rotate timestamp labels
+    plt.xticks(rotation=90)
     
-    # Iterate over the timestamps to create a progressive plot
-    for timestamp in prediction_counts.index:
-        ax.clear()
-        # Plot all bars up to the current timestamp
-        df_cumulative = prediction_counts.loc[:timestamp]
-        df_cumulative.sum(axis=0).plot(kind='bar', ax=ax, color=['green', 'orange', 'red'], width=0.8)
-        ax.set_xlabel('Prediction Level')
-        ax.set_ylabel('Count')
-        ax.set_title(f'Cumulative Predictions up to {timestamp}')
-        plt.tight_layout()
-        st.pyplot(fig)
+    st.pyplot(fig)
 
     # Allow user to download the results
     csv = df.to_csv(index=False)
@@ -119,6 +128,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 # def fetch_and_predict():
 #     # Read data from the sheet
