@@ -90,12 +90,11 @@ def fetch_and_predict():
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
     # Plot results
-    color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
-    df['Color'] = df['Prediction'].map(color_map)
     fig, ax = plt.subplots()
-    for label, color in color_map.items():
+    for label in df['Prediction'].unique():
         subset = df[df['Prediction'] == label]
-        ax.scatter(subset['Timestamp'], [label] * len(subset), color=color, label=label)
+        ax.plot(subset['Timestamp'], subset['Prediction'], marker='o', linestyle='-', label=label)
+    
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Prediction')
     ax.set_title('Real-Time Prediction Results')
@@ -108,4 +107,80 @@ def fetch_and_predict():
 
 if st.button('Fetch and Predict'):
     fetch_and_predict()
+
+
+# def fetch_and_predict():
+#     # Read data from the sheet
+#     data = worksheet.get_all_values()
+#     df = pd.DataFrame(data[1:], columns=data[0])
+
+#     # Ensure required columns exist
+#     expected_columns = ['Week', 'Temp', 'Hum', 'Gas', 'Prev. Status']
+    
+#     # Check if 'Prev. Status' column exists, if not create it with a default value 'M'
+#     if 'Prev. Status' not in df.columns:
+#         st.warning("'Prev. Status' column is missing in the Google Sheet. Adding a default value 'M'.")
+#         df['Prev. Status'] = 'M'
+#     else:
+#         # Fill missing values in 'Prev. Status' with a default value 'M'
+#         df['Prev. Status'].fillna('M', inplace=True)
+    
+#     # Convert columns to appropriate data types
+#     for col in ['Week', 'Temp', 'Hum', 'Gas']:
+#         df[col] = pd.to_numeric(df[col], errors='coerce')
+
+#     # Handle encoding of 'Prev. Status'
+#     try:
+#         # Fit the encoder on the known categories (only if it hasn't been fit before)
+#         if 'Prev_Status' not in df.columns:
+#             df['Prev_Status'] = label_encoder.fit_transform(df[['Prev. Status']])
+#         else:
+#             df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
+#     except ValueError as e:
+#         st.error(f"Error in transforming 'Prev. Status' column: {str(e)}")
+#         st.stop()
+
+#     # Drop rows with any NaN values
+#     df.dropna(subset=expected_columns, inplace=True)
+
+#     # Select features and scale them
+#     features = df[['Week', 'Prev_Status', 'Temp', 'Hum', 'Gas']]
+#     try:
+#         features_scaled = scaler.transform(features)
+#     except ValueError as e:
+#         st.error(f"Error in scaling features: {str(e)}")
+#         st.stop()
+
+#     # Predict using the model
+#     predictions = model.predict(features_scaled)
+#     df['Prediction'] = predictions
+
+#     # Add timestamp to the dataframe
+#     if 'DATE' in df.columns and 'TIME' in df.columns:
+#         df['Timestamp'] = pd.to_datetime(df['DATE'] + ' ' + df['TIME'])
+#     else:
+#         df['Timestamp'] = pd.Timestamp.now()
+
+#     # Update session state plot data
+#     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
+
+#     # Plot results
+#     color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
+#     df['Color'] = df['Prediction'].map(color_map)
+#     fig, ax = plt.subplots()
+#     for label, color in color_map.items():
+#         subset = df[df['Prediction'] == label]
+#         ax.scatter(subset['Timestamp'], [label] * len(subset), color=color, label=label)
+#     ax.set_xlabel('Timestamp')
+#     ax.set_ylabel('Prediction')
+#     ax.set_title('Real-Time Prediction Results')
+#     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+#     st.pyplot(fig)
+
+#     # Allow user to download the results
+#     csv = df.to_csv(index=False)
+#     st.download_button(label="Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
+
+# if st.button('Fetch and Predict'):
+#     fetch_and_predict()
 
