@@ -89,17 +89,22 @@ def fetch_and_predict():
     # Update session state plot data
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
-    # Plot results
+    # Plot results as a flowing bar chart
     fig, ax = plt.subplots()
-    for label in df['Prediction'].unique():
-        subset = df[df['Prediction'] == label]
-        ax.plot(subset['Timestamp'], subset['Prediction'], marker='o', linestyle='-', label=label)
-    
-    ax.set_xlabel('Timestamp')
-    ax.set_ylabel('Prediction')
-    ax.set_title('Real-Time Prediction Results')
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    st.pyplot(fig)
+    df_sorted = st.session_state.plot_data.sort_values(by='Timestamp')
+
+    # Calculate the counts for each prediction category
+    prediction_counts = df_sorted.groupby(['Timestamp', 'Prediction']).size().unstack(fill_value=0)
+
+    # Plot each timestamp with a bar chart
+    for timestamp in prediction_counts.index:
+        ax.clear()
+        prediction_counts.loc[timestamp].plot(kind='bar', ax=ax, color=['green', 'orange', 'red'], width=0.8)
+        ax.set_xlabel('Prediction Level')
+        ax.set_ylabel('Count')
+        ax.set_title(f'Predictions at {timestamp}')
+        plt.tight_layout()
+        st.pyplot(fig)
 
     # Allow user to download the results
     csv = df.to_csv(index=False)
@@ -107,7 +112,6 @@ def fetch_and_predict():
 
 if st.button('Fetch and Predict'):
     fetch_and_predict()
-
 
 # def fetch_and_predict():
 #     # Read data from the sheet
