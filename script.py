@@ -91,18 +91,26 @@ def fetch_and_predict():
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
     # Plot results as a progressive histogram with connected points
-    fig, ax = plt.subplots(figsize=(12, 8))  # Increase figure size
+    fig, ax = plt.subplots(figsize=(14, 8))  # Increase figure size
+
     df_sorted = st.session_state.plot_data.sort_values(by='Timestamp')
 
-    # Plot histogram bars
-    for status in ['M', 'U', 'S']:
+    # Define heights for each prediction status
+    heights = {'U': 3, 'M': 6, 'S': 10}
+    
+    # Plot bars and connect tops with lines
+    for status in ['U', 'M', 'S']:
         subset = df_sorted[df_sorted['Prediction'] == status]
-        ax.hist(subset['Timestamp'], bins=30, label=status, alpha=0.6, edgecolor='black')  # Adjust bins and add edgecolor
+        counts = subset['Timestamp'].value_counts().sort_index()  # Count occurrences per timestamp
+        timestamps = counts.index
+        values = counts.values * heights[status]  # Adjust height for each status
 
-    # Plot connected points
-    for status in ['M', 'U', 'S']:
-        subset = df_sorted[df_sorted['Prediction'] == status]
-        ax.plot(subset['Timestamp'], [status] * len(subset), 'o-', label=f'{status} Points', markersize=8)  # Increase marker size
+        # Plot bars
+        ax.bar(timestamps, values, width=0.5, label=f'{status} Bars', alpha=0.6, edgecolor='black')
+        
+        # Plot line connecting tops of the bars
+        if len(timestamps) > 1:
+            ax.plot(timestamps, values, marker='o', linestyle='-', label=f'{status} Line', linewidth=2)
 
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Prediction Level')
@@ -126,6 +134,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 
