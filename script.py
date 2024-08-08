@@ -87,8 +87,9 @@ def fetch_and_predict():
     df['Color'] = df['Prediction'].map(color_map)
     
     # Use the midpoints of the timestamp for plotting
-    midpoints = (df['Timestamp'][:-1] + df['Timestamp'][1:]) / 2
-    
+    df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
+    midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
+
     ax.step(midpoints, df['Prediction'].map({'S': 10, 'M': 6, 'U': 3})[:-1], where='mid', color='black')
     ax.set_ylim(0, 11)
     ax.set_yticks([3, 6, 10])
@@ -112,6 +113,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 
