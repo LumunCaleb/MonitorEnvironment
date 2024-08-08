@@ -89,20 +89,22 @@ def fetch_and_predict():
     # Update session state plot data
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
-    # Plot results as a flowing bar chart
+    # Plot results as a progressive bar chart
     fig, ax = plt.subplots()
     df_sorted = st.session_state.plot_data.sort_values(by='Timestamp')
 
-    # Calculate the counts for each prediction category
+    # Calculate the counts for each prediction category over time
     prediction_counts = df_sorted.groupby(['Timestamp', 'Prediction']).size().unstack(fill_value=0)
-
-    # Plot each timestamp with a bar chart
+    
+    # Iterate over the timestamps to create a progressive plot
     for timestamp in prediction_counts.index:
         ax.clear()
-        prediction_counts.loc[timestamp].plot(kind='bar', ax=ax, color=['green', 'orange', 'red'], width=0.8)
+        # Plot all bars up to the current timestamp
+        df_cumulative = prediction_counts.loc[:timestamp]
+        df_cumulative.sum(axis=0).plot(kind='bar', ax=ax, color=['green', 'orange', 'red'], width=0.8)
         ax.set_xlabel('Prediction Level')
         ax.set_ylabel('Count')
-        ax.set_title(f'Predictions at {timestamp}')
+        ax.set_title(f'Cumulative Predictions up to {timestamp}')
         plt.tight_layout()
         st.pyplot(fig)
 
@@ -112,6 +114,11 @@ def fetch_and_predict():
 
 if st.button('Fetch and Predict'):
     fetch_and_predict()
+
+st.write("This section will refresh every 60 seconds to fetch new data and update predictions.")
+while True:
+    fetch_and_predict()
+    time.sleep(60)
 
 # def fetch_and_predict():
 #     # Read data from the sheet
