@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 import time
 
 # Define the paths to your joblib files
@@ -46,9 +46,6 @@ def fetch_and_predict():
     if 'Prev. Status' not in df.columns:
         st.warning("'Prev. Status' column is missing in the Google Sheet. Adding a default value 'M'.")
         df['Prev. Status'] = 'M'
-    else:
-        # Fill missing values in 'Prev. Status' with a default value 'M'
-        df['Prev. Status'].fillna('M', inplace=True)
     
     # Convert columns to appropriate data types
     for col in ['Week', 'Temp', 'Hum', 'Gas']:
@@ -56,11 +53,7 @@ def fetch_and_predict():
 
     # Handle encoding of 'Prev. Status'
     try:
-        # Fit the encoder on the known categories (only if it hasn't been fit before)
-        if 'Prev_Status' not in df.columns:
-            df['Prev_Status'] = label_encoder.fit_transform(df[['Prev. Status']])
-        else:
-            df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
+        df['Prev_Status'] = label_encoder.transform(df[['Prev. Status']])
     except ValueError as e:
         st.error(f"Error in transforming 'Prev. Status' column: {str(e)}")
         st.stop()
@@ -70,11 +63,7 @@ def fetch_and_predict():
 
     # Select features and scale them
     features = df[['Week', 'Prev_Status', 'Temp', 'Hum', 'Gas']]
-    try:
-        features_scaled = scaler.transform(features)
-    except ValueError as e:
-        st.error(f"Error in scaling features: {str(e)}")
-        st.stop()
+    features_scaled = scaler.transform(features)
 
     # Predict using the model
     predictions = model.predict(features_scaled)
@@ -87,39 +76,24 @@ def fetch_and_predict():
         df['Timestamp'] = pd.Timestamp.now()
 
     # Update session state plot data
-    st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Prev_Status', 'Prediction']]])
+    st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
-    # Sankey Plot - Group by Prev_Status and Prediction
-    sankey_df = st.session_state.plot_data.groupby(['Prev_Status', 'Prediction']).size().reset_index(name='Count')
+    # Plot results using a stepwise plot
+    fig, ax = plt.subplots()
+    color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
+    df['Color'] = df['Prediction'].map(color_map)
+    
+    ax.stairs(df['Prediction'].map({'S': 10, 'M': 6, 'U': 3}), df['Timestamp'], color='black', where='post')
+    ax.set_ylim(0, 11)
+    ax.set_yticks([3, 6, 10])
+    ax.set_yticklabels(['U', 'M', 'S'])
 
-    # Define node labels
-    labels = ['M', 'U', 'S']
-    label_dict = {label: i for i, label in enumerate(labels)}
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Prediction Status')
+    ax.set_title('Real-Time Prediction Results')
 
-    # Create source and target lists for the sankey diagram
-    sources = sankey_df['Prev_Status'].map(label_dict).tolist()
-    targets = sankey_df['Prediction'].map(label_dict).tolist()
-    values = sankey_df['Count'].tolist()
-
-    # Create the Sankey diagram
-    fig = go.Figure(data=[go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=labels,
-            color=["orange", "red", "green"]
-        ),
-        link=dict(
-            source=sources,
-            target=targets,
-            value=values,
-            color=["rgba(255,165,0,0.8)", "rgba(255,0,0,0.8)", "rgba(0,128,0,0.8)"]
-        )
-    )])
-
-    fig.update_layout(title_text="Sankey Diagram of Prediction Transitions", font_size=10)
-    st.plotly_chart(fig)
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
     # Allow user to download the results
     csv = df.to_csv(index=False)
@@ -132,6 +106,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 
