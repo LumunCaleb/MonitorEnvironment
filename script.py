@@ -86,7 +86,10 @@ def fetch_and_predict():
     color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
     df['Color'] = df['Prediction'].map(color_map)
     
-    ax.stairs(df['Prediction'].map({'S': 10, 'M': 6, 'U': 3}), df['Timestamp'], color='black', where='post')
+    # Use the midpoints of the timestamp for plotting
+    midpoints = (df['Timestamp'][:-1] + df['Timestamp'][1:]) / 2
+    
+    ax.step(midpoints, df['Prediction'].map({'S': 10, 'M': 6, 'U': 3})[:-1], where='mid', color='black')
     ax.set_ylim(0, 11)
     ax.set_yticks([3, 6, 10])
     ax.set_yticklabels(['U', 'M', 'S'])
@@ -109,6 +112,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 
