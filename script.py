@@ -4,6 +4,7 @@ import joblib
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib.pyplot as plt
+import numpy as np
 import time
 
 # Define the paths to your joblib files
@@ -83,14 +84,19 @@ def fetch_and_predict():
 
     # Plot results using a stepwise plot
     fig, ax = plt.subplots()
-    color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
-    df['Color'] = df['Prediction'].map(color_map)
+    
+    # Color-coded horizontal lines or bands for U, M, S
+    ax.axhline(y=3, color='red', linestyle='-', linewidth=2, label='U')
+    ax.axhline(y=6, color='orange', linestyle='-', linewidth=2, label='M')
+    ax.axhline(y=10, color='green', linestyle='-', linewidth=2, label='S')
     
     # Use the midpoints of the timestamp for plotting
     df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
     midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
 
+    # Step plot for the predictions
     ax.step(midpoints, df['Prediction'].map({'S': 10, 'M': 6, 'U': 3})[:-1], where='mid', color='black')
+    
     ax.set_ylim(0, 11)
     ax.set_yticks([3, 6, 10])
     ax.set_yticklabels(['U', 'M', 'S'])
@@ -98,6 +104,7 @@ def fetch_and_predict():
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Prediction Status')
     ax.set_title('Real-Time Prediction Results')
+    ax.legend(loc='upper left')
 
     plt.xticks(rotation=45)
     st.pyplot(fig)
@@ -113,6 +120,7 @@ st.write("This section will refresh every 60 seconds to fetch new data and updat
 while True:
     fetch_and_predict()
     time.sleep(60)
+
 
 
 
