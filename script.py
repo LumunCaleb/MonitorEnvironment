@@ -82,13 +82,13 @@ def fetch_and_predict():
     # Update session state plot data
     st.session_state.plot_data = pd.concat([st.session_state.plot_data, df[['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp']]])
 
-    # Plot results using a stepwise plot
+    # Plot results using a stepwise plot with gradient background
     fig, ax = plt.subplots()
     
-    # Color-coded horizontal lines or bands for U, M, S
-    ax.axhline(y=3, color='red', linestyle='-', linewidth=2, label='U')
-    ax.axhline(y=6, color='orange', linestyle='-', linewidth=2, label='M')
-    ax.axhline(y=10, color='green', linestyle='-', linewidth=2, label='S')
+    # Fill the areas between levels with lighter colors
+    ax.fill_between(df['Timestamp'], 0, 3, color='red', alpha=0.2)  # Red for U level
+    ax.fill_between(df['Timestamp'], 3, 6, color='orange', alpha=0.2)  # Orange for M level
+    ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=0.2)  # Green for S level
     
     # Use the midpoints of the timestamp for plotting
     df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
@@ -104,7 +104,6 @@ def fetch_and_predict():
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Prediction Status')
     ax.set_title('Real-Time Prediction Results')
-    ax.legend(loc='upper left')
 
     plt.xticks(rotation=45)
     st.pyplot(fig)
