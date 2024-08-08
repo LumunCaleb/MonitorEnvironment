@@ -1,39 +1,3 @@
-import streamlit as st
-import pandas as pd
-import joblib
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import matplotlib.pyplot as plt
-import time
-
-# Define the paths to your joblib files
-joblib_file_path = 'knnmainnew_model.joblib'
-label_encoder_path = 'encoder.joblib'
-scaler_path = 'scaler.joblib'
-
-# Load the model, label encoder, and scaler using joblib
-model = joblib.load(joblib_file_path)
-label_encoder = joblib.load(label_encoder_path)
-scaler = joblib.load(scaler_path)
-
-st.title("Environmental Monitoring App")
-
-# Initialize session state variables
-if 'previous_prediction' not in st.session_state:
-    st.session_state.previous_prediction = 'M'
-if 'plot_data' not in st.session_state:
-    st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp'])
-
-st.write("Real-Time Prediction from Google Sheets:")
-
-# Google Sheets API setup
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_api"], scope)
-client = gspread.authorize(creds)
-sheet_url = 'https://docs.google.com/spreadsheets/d/1lbGCOmPlX4HXzNW2WDfocolRO6E28uFGTNeeH_yBIbo/edit#gid=0'
-sheet = client.open_by_url(sheet_url)
-worksheet = sheet.get_worksheet(0)
-
 def fetch_and_predict():
     # Read data from the sheet
     data = worksheet.get_all_values()
@@ -46,6 +10,9 @@ def fetch_and_predict():
     if 'Prev. Status' not in df.columns:
         st.warning("'Prev. Status' column is missing in the Google Sheet. Adding a default value 'M'.")
         df['Prev. Status'] = 'M'
+    else:
+        # Fill missing values in 'Prev. Status' with a default value 'M'
+        df['Prev. Status'].fillna('M', inplace=True)
     
     # Convert columns to appropriate data types
     for col in ['Week', 'Temp', 'Hum', 'Gas']:
@@ -63,7 +30,11 @@ def fetch_and_predict():
 
     # Select features and scale them
     features = df[['Week', 'Prev_Status', 'Temp', 'Hum', 'Gas']]
-    features_scaled = scaler.transform(features)
+    try:
+        features_scaled = scaler.transform(features)
+    except ValueError as e:
+        st.error(f"Error in scaling features: {str(e)}")
+        st.stop()
 
     # Predict using the model
     predictions = model.predict(features_scaled)
