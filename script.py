@@ -86,9 +86,9 @@ def fetch_and_predict():
     fig, ax = plt.subplots()
     
     # Fill the areas between levels with lighter colors
-    ax.fill_between(df['Timestamp'], 0, 3, color='red', alpha=0.2)  # Red for U level
-    ax.fill_between(df['Timestamp'], 3, 6, color='orange', alpha=0.2)  # Orange for M level
-    ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=0.2)  # Green for S level
+    ax.fill_between(df['Timestamp'], 0, 3, color='red', alpha=1)  # Red for U level
+    ax.fill_between(df['Timestamp'], 3, 6, color='orange', alpha=1)  # Orange for M level
+    ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=1)  # Green for S level
     
     # Use the midpoints of the timestamp for plotting
     df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
