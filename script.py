@@ -95,7 +95,7 @@ def fetch_and_predict():
     midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
 
     # Step plot for the predictions
-    ax.step(midpoints, df['Prediction'].map({'S': 10, 'M': 6, 'U': 3})[:-1], where='mid', color='black')
+    ax.step(midpoints, df['Prediction'].map({'S': 8, 'M': 4.5, 'U': 1.5})[:-1], where='mid', color='black')
     
     ax.set_ylim(0, 11)
     ax.set_yticks([1.5, 4.56, 8])
