@@ -49,7 +49,7 @@ st.markdown(
     }
     .css-18e3th9 { /* Header */
         background-color: #003300;  /* Darker green for header */
-        color: white;  /* White text color */
+        color: Black;  /* White text color */
     }
     .css-1j7a9z2 { /* Button */
         background-color: #006400;  /* Dark green for button */
