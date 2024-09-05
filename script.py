@@ -30,10 +30,10 @@ worksheet = sheet.get_worksheet(0)
 st.title("Environmental Monitoring App")
 
 # # Initialize session state variables
-# if 'previous_prediction' not in st.session_state:
-#     st.session_state.previous_prediction = 'M'
-# if 'plot_data' not in st.session_state:
-#     st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp'])
+if 'previous_prediction' not in st.session_state:
+    st.session_state.previous_prediction = 'M'
+if 'plot_data' not in st.session_state:
+    st.session_state.plot_data = pd.DataFrame(columns=['Week', 'Temp', 'Hum', 'Gas', 'Prev_Status', 'Prediction', 'Timestamp'])
 
 # Initialize session state variables to track previous prediction
 if 'previous_prediction' not in st.session_state:
