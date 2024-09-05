@@ -460,10 +460,10 @@ elif option == "View Real Time Prediction":
         midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
     
         # Step plot for the predictions
-        ax.step(midpoints, df['Prediction'].map({'S': 8, 'M': 4.5, 'U': 1.5})[:-1], where='mid', color='black')
+        ax.step(midpoints, df['Prediction'].map({'S': 8.3, 'M': 4.95, 'U': 1.65})[:-1], where='mid', color='black')
         
         ax.set_ylim(0, 10)
-        ax.set_yticks([1.5, 4.56, 8])
+        ax.set_yticks([1.65, 4.95, 8.3])
         ax.set_yticklabels(['U', 'M', 'S'])
     
         ax.set_xlabel('Timestamp')
