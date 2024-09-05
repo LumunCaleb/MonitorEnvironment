@@ -97,7 +97,7 @@ def fetch_and_predict():
     # Step plot for the predictions
     ax.step(midpoints, df['Prediction'].map({'S': 8, 'M': 4.5, 'U': 1.5})[:-1], where='mid', color='black')
     
-    ax.set_ylim(0, 11)
+    ax.set_ylim(0, 10)
     ax.set_yticks([1.5, 4.56, 8])
     ax.set_yticklabels(['U', 'M', 'S'])
 
