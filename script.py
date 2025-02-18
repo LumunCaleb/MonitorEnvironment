@@ -257,19 +257,19 @@ elif option == "Upload a CSV File":
                             ax.set_title('Prediction Results')
                             
                             plt.xticks(rotation=45)
-                            st.pyplot(fig)
+                        st.pyplot(fig)
                             
                             # Convert DataFrame to CSV for download
-                            download_df = df
-                            # csv = download_df.to_csv(index=False).encode('utf-8')
+                        download_df = df
+                        csv = download_df.to_csv(index=False).encode('utf-8')
                             
-                            # Download button
-                            st.download_button(
-                                label="Download Predictions as CSV",
-                                data=csv,
-                                file_name='predicted_results.csv',
-                                mime='text/csv',
-                                key='download-csv-unique')
+                        # Download button
+                        st.download_button(
+                            label="Download Predictions as CSV",
+                            data=csv,
+                            file_name='predicted_results.csv',
+                            mime='text/csv',
+                            key='download-csv-unique')
                             
                             
         except Exception as e:
