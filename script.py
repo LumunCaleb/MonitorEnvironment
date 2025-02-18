@@ -232,11 +232,12 @@ elif option == "Upload a CSV File":
                             df.at[i, 'Prev. Status'] = prev_prediction
                             prev_prediction = df.at[i, 'Prediction']
 
-                     
+                             # Compute midpoints for step plot
+                            midpoints = (df.index[:-1] + df.index[1:]) / 2
                             fig, ax = plt.subplots()
 
                             # Define x-axis range
-                            x_range = [df.index.min(), df.index.max()]
+                            x_range = df.index
                             
                             # Corrected fill_between usage
                             ax.fill_between(x_range, 0, 3, color='red', alpha=0.3)  # Red for U level
@@ -253,7 +254,7 @@ elif option == "Upload a CSV File":
                             
                             ax.set_xlabel('Timestamp')
                             ax.set_ylabel('Prediction Status')
-                            ax.set_title('Real-Time Prediction Results')
+                            ax.set_title('Prediction Results')
                             
                             plt.xticks(rotation=45)
                             st.pyplot(fig)
