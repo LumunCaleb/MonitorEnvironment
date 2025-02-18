@@ -261,15 +261,15 @@ elif option == "Upload a CSV File":
                             
                             # Convert DataFrame to CSV for download
                             download_df = df
-                            csv = download_df.to_csv(index=False).encode('utf-8')
+                            # csv = download_df.to_csv(index=False).encode('utf-8')
                             
-                            # # Download button
-                            # st.download_button(
-                            #     label="Download Predictions as CSV",
-                            #     data=csv,
-                            #     file_name='predicted_results.csv',
-                            #     mime='text/csv',
-                            key='download-csv-unique'
+                            # Download button
+                            st.download_button(
+                                label="Download Predictions as CSV",
+                                data=csv,
+                                file_name='predicted_results.csv',
+                                mime='text/csv',
+                                key='download-csv-unique')
                             
                             
         except Exception as e:
