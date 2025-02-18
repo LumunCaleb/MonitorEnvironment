@@ -261,14 +261,15 @@ elif option == "Upload a CSV File":
                             fig, ax = plt.subplots()
                         
                             # Fill the areas between levels with lighter colors
-                            ax.fill_between([0,10],0, 3, color='red', alpha=1)  # Red for U level
-                            ax.fill_between( [0,10],3, 6, color='orange', alpha=1)  # Orange for M level
-                            ax.fill_between([0,10],6, 10, color='green', alpha=1)  # Green for S level
+                            x_range = [df.index.min(), df.index.max()]
+                            ax.fill_between(x_range, color='red', alpha=1)  # Red for U level
+                            ax.fill_between( x_range,3, 6, color='orange', alpha=1)  # Orange for M level
+                            ax.fill_between(x_range,6, 10, color='green', alpha=1)  # Green for S level
                             # ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=1)  # Green for S level
                             
                             # Use the midpoints of the timestamp for plotting
                             # df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
-                            midpoints = (df.index[:-1] + df.index[1:]) / 2
+                            ax.step(midpoints, df['Prediction_mapped'][:-1], where='mid', color='black')
                             # midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
                         
                             # Step plot for the predictions
@@ -286,8 +287,11 @@ elif option == "Upload a CSV File":
                             st.pyplot(fig)
     
                             # Convert DataFrame to CSV
-                            csv = download_df.to_csv(index=False)
-                        
+                            download_df = df  # Assign df to download_df (if df is the correct DataFrame)
+
+                            # Convert DataFrame to CSV
+                            csv = download_df.to_csv(index=False).encode('utf-8')  # Encode to UTF-8
+                           
                         # Create a download button
                         st.download_button(
                             label="Download Predictions as CSV",
