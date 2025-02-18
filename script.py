@@ -270,7 +270,7 @@ elif option == "Upload a CSV File":
                             #     file_name='predicted_results.csv',
                             #     mime='text/csv',
                             key='download-csv-unique'
-                            )
+                            
                             
         except Exception as e:
             st.error(f"Error reading the CSV file: {e}")
