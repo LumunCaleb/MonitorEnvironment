@@ -232,33 +232,59 @@ elif option == "Upload a CSV File":
                             df.at[i, 'Prev. Status'] = prev_prediction
                             prev_prediction = df.at[i, 'Prediction']
 
-                        # Map prediction results to colors
-                        color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
-                        df['Color'] = df['Prediction'].map(color_map)
-                        # Plot results
-                        fig, ax = plt.subplots()
-                        for label, color in color_map.items():
-                            subset = df[df['Prediction'] == label]
-                            ax.scatter(subset.index, [label] * len(subset), color=color, label=label)
+                        
 
-                        ax.set_xlabel('Index')
-                        ax.set_ylabel('Prediction')
-                        ax.set_title('Prediction Results')
-                        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+                        # # Map prediction results to colors
+                        # color_map = {'S': 'green', 'M': 'orange', 'U': 'red'}
+                        # df['Color'] = df['Prediction'].map(color_map)
+                        # # Plot results
+                        # fig, ax = plt.subplots()
+                        # for label, color in color_map.items():
+                        #     subset = df[df['Prediction'] == label]
+                        #     ax.scatter(subset.index, [label] * len(subset), color=color, label=label)
 
-                        st.pyplot(fig)
+                        # ax.set_xlabel('Index')
+                        # ax.set_ylabel('Prediction')
+                        # ax.set_title('Prediction Results')
+                        # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
-                        # Prepare DataFrame to download
-                        download_df = pd.DataFrame({
-                            'Temperature': [25, 30, 35],
-                            'Humidity': [60, 65, 70],
-                            'Gas Level': [300, 320, 340],
-                            'Weeks of Poultry Birds': [2, 3, 4],
-                            'Predicted Status': ['M', 'U', 'S']
-                        })
+                        # st.pyplot(fig)
 
-                        # Convert DataFrame to CSV
-                        csv = download_df.to_csv(index=False)
+                        # # Prepare DataFrame to download
+                        # download_df = pd.DataFrame({
+                        #     'Temperature': [25, 30, 35],
+                        #     'Humidity': [60, 65, 70],
+                        #     'Gas Level': [300, 320, 340],
+                        #     'Weeks of Poultry Birds': [2, 3, 4],
+                        #     'Predicted Status': ['M', 'U', 'S']
+                        # })  # Plot results using a stepwise plot with gradient background
+                            fig, ax = plt.subplots()
+                        
+                            # Fill the areas between levels with lighter colors
+                            ax.fill_between(df['Timestamp'], 0, 3, color='red', alpha=1)  # Red for U level
+                            ax.fill_between(df['Timestamp'], 3, 6, color='orange', alpha=1)  # Orange for M level
+                            ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=1)  # Green for S level
+                            
+                            # Use the midpoints of the timestamp for plotting
+                            df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
+                            midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
+                        
+                            # Step plot for the predictions
+                            ax.step(midpoints, df['Prediction'].map({'S': 8, 'M': 4.5, 'U': 1.5})[:-1], where='mid', color='black')
+                            
+                            ax.set_ylim(0, 10)
+                            ax.set_yticks([1.5, 4.56, 8])
+                            ax.set_yticklabels(['U', 'M', 'S'])
+                        
+                            ax.set_xlabel('Timestamp')
+                            ax.set_ylabel('Prediction Status')
+                            ax.set_title('Real-Time Prediction Results')
+                        
+                            plt.xticks(rotation=45)
+                            st.pyplot(fig)
+    
+                            # Convert DataFrame to CSV
+                            csv = download_df.to_csv(index=False)
                         
                         # Create a download button
                         st.download_button(
