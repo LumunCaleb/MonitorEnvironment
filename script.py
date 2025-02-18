@@ -261,13 +261,14 @@ elif option == "Upload a CSV File":
                             fig, ax = plt.subplots()
                         
                             # Fill the areas between levels with lighter colors
-                            ax.fill_between(0, 3, color='red', alpha=1)  # Red for U level
-                            ax.fill_between( 3, 6, color='orange', alpha=1)  # Orange for M level
-                            ax.fill_between(6, 10, color='green', alpha=1)  # Green for S level
+                            ax.fill_between([0,10],0, 3, color='red', alpha=1)  # Red for U level
+                            ax.fill_between( [0,10],3, 6, color='orange', alpha=1)  # Orange for M level
+                            ax.fill_between([0,10],6, 10, color='green', alpha=1)  # Green for S level
                             # ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=1)  # Green for S level
                             
                             # Use the midpoints of the timestamp for plotting
                             # df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
+                            midpoints = (df.index[:-1] + df.index[1:]) / 2
                             # midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
                         
                             # Step plot for the predictions
