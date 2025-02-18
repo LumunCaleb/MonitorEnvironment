@@ -266,8 +266,8 @@ elif option == "Upload a CSV File":
                             ax.fill_between(df['Timestamp'], 6, 10, color='green', alpha=1)  # Green for S level
                             
                             # Use the midpoints of the timestamp for plotting
-                            df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
-                            midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
+                            # df['Timestamp_numeric'] = df['Timestamp'].view(int)  # Convert timestamp to numeric for calculations
+                            # midpoints = ((df['Timestamp_numeric'][:-1].values + df['Timestamp_numeric'][1:].values) / 2).astype('datetime64[ns]')
                         
                             # Step plot for the predictions
                             ax.step(midpoints, df['Prediction'].map({'S': 8, 'M': 4.5, 'U': 1.5})[:-1], where='mid', color='black')
