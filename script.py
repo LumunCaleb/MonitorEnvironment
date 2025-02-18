@@ -240,8 +240,8 @@ elif option == "Upload a CSV File":
                             x_range = df.index
                             
                             # Corrected fill_between usage
-                            ax.fill_between(x_range, 0, 3, color='red', alpha=.3)  # Red for U level
-                            ax.fill_between(x_range, 3, 6, color='orange', alpha=.6)  # Orange for M level
+                            ax.fill_between(x_range, 0, 3, color='red', alpha=.6)  # Red for U level
+                            ax.fill_between(x_range, 3, 6, color='orange', alpha=.3)  # Orange for M level
                             ax.fill_between(x_range, 6, 10, color='green', alpha=1)  # Green for S level
                             
                             # Step plot for predictions
