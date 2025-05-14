@@ -27,7 +27,7 @@ sheet_url = 'https://docs.google.com/spreadsheets/d/1lbGCOmPlX4HXzNW2WDfocolRO6E
 sheet = client.open_by_url(sheet_url)
 worksheet = sheet.get_worksheet(0)
 
-st.title("Environmental Monitoring App")
+st.title("Poultry Farm Environmental Monitoring App")
 
 # # Initialize session state variables
 if 'previous_prediction' not in st.session_state:
