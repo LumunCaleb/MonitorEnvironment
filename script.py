@@ -355,12 +355,12 @@ elif option == "View Real Time Prediction":
         plt.xticks(rotation=45)
         st.pyplot(fig)
     
-    # Allow user to download the results
-    csv = df.to_csv(index=False)
-    st.download_button(label="Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
+        # Allow user to download the results
+        csv = df.to_csv(index=False)
+        st.download_button(label="Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
     
-    if st.button('Fetch and Predict'):
-        fetch_and_predict()
+    # if st.button('Fetch and Predict'):
+    #     fetch_and_predict()
     
     st.write("This section will refresh every 60 seconds to fetch new data and update predictions.")
     while True:
